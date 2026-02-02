@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index Size Calculator</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex: 1;
+        }
+        .slider-value {
+            min-width: 50px;
+            text-align: right;
+        }
+        #output {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Index Size Calculator</h1>
+
+    <label for="bf_size">Bloom Filter Size (bits)</label>
+    <input type="number" id="bf_size" value="8388608" min="1">
+
+    <label for="span">Span</label>
+    <input type="number" id="span" value="22" min="0">
+
+    <label for="max_kmer_count">Max K-mer Count</label>
+    <input type="number" id="max_kmer_count" value="4194304" min="1">
+
+    <label for="fpr">False Positive Rate (f)</label>
+    <input type="number" id="fpr" value="0.25" min="0.0001" max="1" step="0.0001">
+
+    <label for="n_samples">Number of Samples</label>
+    <input type="number" id="n_samples" value="100" min="1">
+
+    <label for="n_partitions">Number of Partitions</label>
+    <div class="slider-container">
+        <input type="range" id="n_partitions" min="0" max="10" value="8">
+        <span class="slider-value" id="partition_display">256</span>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        const bfSizeInput = document.getElementById('bf_size');
+        const spanInput = document.getElementById('span');
+        const maxKmerCountInput = document.getElementById('max_kmer_count');
+        const fprInput = document.getElementById('fpr');
+        const nSamplesInput = document.getElementById('n_samples');
+        const nPartitionsInput = document.getElementById('n_partitions');
+        const partitionDisplay = document.getElementById('partition_display');
+        const output = document.getElementById('output');
+
+        let updating = false;
+
+        // Slider values: 1, 2, 4, 8, ... 1024 (powers of 2)
+        function sliderToPartitions(val) {
+            return Math.pow(2, val);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            if (bytes < 1024 * 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+            return (bytes / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB';
+        }
+
+        // bf_size = ((f * 2^(span+1) + 7) // 8) * 8
+        function computeBfSize(f, span) {
+            return Math.floor((-Math.log(f) / (Math.log(2) ** 2) * Math.pow(2, span + 1) + 7) / 8) * 8;
+        }
+
+        // span = log2(kmer_count)
+        function computeSpan(kmerCount) {
+            return Math.floor(Math.log2(kmerCount));
+        }
+
+        // kmer_count = 2^span
+        function computeMaxKmerCount(span) {
+            return Math.pow(2, span + 1) - 1;
+        }
+
+        // Reverse: given bf_size and f, find span
+        // bf_size >= f * 2^(span+1), so span = floor(log2(bf_size / f)) - 1
+        function computeSpanFromBfSize(bfSize, f) {
+            const span = Math.floor(Math.log2(bfSize / f)) - 1;
+            return Math.max(0, span);
+        }
+
+        function updateFromBfSize() {
+            if (updating) return;
+            updating = true;
+            const bfSize = parseInt(bfSizeInput.value) || 0;
+            const f = parseFloat(fprInput.value) || 0.001;
+            const span = computeSpanFromBfSize(bfSize, f);
+            const kmerCount = computeMaxKmerCount(span);
+            spanInput.value = span;
+            maxKmerCountInput.value = kmerCount;
+            updating = false;
+            calculate();
+        }
+
+        function updateFromSpan() {
+            if (updating) return;
+            updating = true;
+            const span = parseInt(spanInput.value) || 0;
+            const f = parseFloat(fprInput.value) || 0.001;
+            const kmerCount = computeMaxKmerCount(span);
+            const bfSize = computeBfSize(f, span);
+            maxKmerCountInput.value = kmerCount;
+            bfSizeInput.value = bfSize;
+            updating = false;
+            calculate();
+        }
+
+        function updateFromKmerCount() {
+            if (updating) return;
+            updating = true;
+            const kmerCount = parseInt(maxKmerCountInput.value) || 1;
+            const f = parseFloat(fprInput.value) || 0.001;
+            const span = computeSpan(kmerCount);
+            const bfSize = computeBfSize(f, span);
+            spanInput.value = span;
+            bfSizeInput.value = bfSize;
+            updating = false;
+            calculate();
+        }
+
+        function updateFromFpr() {
+            if (updating) return;
+            updating = true;
+            const span = parseInt(spanInput.value) || 0;
+            const f = parseFloat(fprInput.value) || 0.001;
+            const bfSize = computeBfSize(f, span);
+            bfSizeInput.value = bfSize;
+            updating = false;
+            calculate();
+        }
+
+        function calculate() {
+            const bfSize = parseInt(bfSizeInput.value) || 0;
+            const nSamples = parseInt(nSamplesInput.value) || 0;
+            const nPartitions = sliderToPartitions(parseInt(nPartitionsInput.value));
+
+            partitionDisplay.textContent = nPartitions;
+
+            // Row size: ceil(n_samples / 8)
+            const rowSize = Math.floor((nSamples + 7) / 8);
+
+            // Column size calculation
+            const nRows = bfSize;
+            const colSize = Math.floor(
+                Math.floor((nRows / nPartitions + 63) / 64) * 64 * nPartitions
+            );
+
+            const indexSize = rowSize * colSize + nPartitions * 49;
+            const indexSizeStr = formatBytes(indexSize);
+            const partitionFileSize = indexSize / nPartitions;
+            const partitionFileSizeStr = formatBytes(partitionFileSize);
+
+            output.innerHTML = `
+                Size of a row: <strong>${rowSize}</strong> bytes<br>
+                Size of a column: <strong>${colSize}</strong> bytes<br>
+                The index will be split in <strong>${nPartitions}</strong> files.<br>
+                Size of a single partition file: <strong>${partitionFileSize}</strong> bytes (<strong>${partitionFileSizeStr}</strong>)<br>
+                The index will require a total of <strong>${indexSize}</strong> bytes (<strong>${indexSizeStr}</strong>) on disk.
+            `;
+        }
+
+        bfSizeInput.addEventListener('input', updateFromBfSize);
+        spanInput.addEventListener('input', updateFromSpan);
+        maxKmerCountInput.addEventListener('input', updateFromKmerCount);
+        fprInput.addEventListener('input', updateFromFpr);
+        nSamplesInput.addEventListener('input', calculate);
+        nPartitionsInput.addEventListener('input', calculate);
+
+        calculate();
+    </script>
+</body>
+</html>
