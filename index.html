@@ -110,6 +110,7 @@
 </head>
 <body>
     <h1>Index Size Calculator</h1>
+    <p style="color: #666; margin-top: -10px; margin-bottom: 20px;">A tool to help in dimensioning Bloom Filters for <a href="https://tlemane.github.io/kmindex/" style="color: #0066cc;">kmindex</a></p>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="tab-quick">Quick Estimate</button>
@@ -121,10 +122,10 @@
         <label for="q_n_samples">Number of Samples</label>
         <input type="number" id="q_n_samples" value="2000" min="1">
 
-        <label for="q_fpr">False Positive Rate</label>
+        <label for="q_fpr">False Positive Rate for <a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere</a></label>
         <input type="number" id="q_fpr" value="0.25" min="0.0001" max="1" step="0.0001">
 
-        <label for="q_n_partitions">Number of Partitions</label>
+        <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
         <div class="slider-container">
             <input type="range" id="q_n_partitions" min="0" max="10" value="8">
             <span class="slider-value" id="q_partition_display">256</span>
@@ -144,7 +145,7 @@
         <label for="max_kmer_count">Max K-mer Count</label>
         <input type="number" id="max_kmer_count" value="8388607" min="1">
 
-        <label for="fpr">False Positive Rate (f)</label>
+        <label for="fpr">False Positive Rate for <a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere</a></label>
         <input type="number" id="fpr" value="0.25" min="0.0001" max="1" step="0.01">
 
         <label for="n_samples">Number of Samples</label>
