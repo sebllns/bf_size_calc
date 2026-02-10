@@ -94,9 +94,13 @@
             return (bytes / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB';
         }
 
-        // bf_size = ((f * 2^(span+1) + 7) // 8) * 8
+        function computeP(f) {
+            return -Math.log(f) / (Math.log(2) ** 2)
+        }
+
+        // bf_size = ((p * 2^(span+1) + 7) // 8) * 8
         function computeBfSize(f, span) {
-            return Math.floor((-Math.log(f) / (Math.log(2) ** 2) * Math.pow(2, span + 1) + 7) / 8) * 8;
+            return Math.floor((computeP(f) * Math.pow(2, span + 1) + 7) / 8) * 8;
         }
 
         // span = log2(kmer_count)
@@ -110,9 +114,11 @@
         }
 
         // Reverse: given bf_size and f, find span
-        // bf_size >= f * 2^(span+1), so span = floor(log2(bf_size / f)) - 1
+        // bf_size >= p * 2^(span+1), so span = floor(log2(bf_size / p)) - 1
         function computeSpanFromBfSize(bfSize, f) {
-            const span = Math.floor(Math.log2(bfSize / f)) - 1;
+            const b = ((bfSize + 7) / 8) * 8
+            const p = computeP(f)
+            const span = Math.floor(Math.log2(b / p)) - 1;
             return Math.max(0, span);
         }
 
