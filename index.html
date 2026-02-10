@@ -251,6 +251,7 @@
         <button class="tab-btn active" data-tab="tab-quick">Quick Estimate</button>
         <button class="tab-btn" data-tab="tab-advanced">Advanced</button>
         <button class="tab-btn" data-tab="tab-formulas">Explanations</button>
+        <button class="tab-btn" data-tab="tab-references">References</button>
     </div>
 
     <!-- Quick Estimate Tab -->
@@ -259,7 +260,7 @@
         <input type="number" id="q_n_samples" value="2000" min="1">
 
         <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
-                style="color: #0066cc;">findere)</a></label>
+                style="color: #0066cc;">findere</a>)</label>
         <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
 
         <label>Span Range</label>
@@ -304,7 +305,8 @@
 
             <label for="f_fpr">False Positive Rate (<em>p</em>)</label>
             <input type="number" id="f_fpr" value="0.25" min="0.05" max="1" step="0.05">
-
+            <p>See <a href="https://github.com/lrobidou/findere"
+                style="color: #0066cc;">findere</a> for a better understanding of how the false positive rate is reduced at query time.</p>
             <div id="formula_bf_output" class="formula-result"></div>
         </div>
 
@@ -347,7 +349,7 @@
         <input type="number" id="max_kmer_count" value="8388607" min="1">
 
         <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
-                style="color: #0066cc;">findere)</a></label>
+                style="color: #0066cc;">findere</a>)</label>
         <input type="number" id="fpr" value="0.25" min="0.05" max="1" step="0.05">
 
         <label for="n_samples">Number of Samples</label>
@@ -360,6 +362,34 @@
         </div>
 
         <div id="output" class="output"></div>
+    </div>
+
+    <!-- References Tab -->
+    <div id="tab-references" class="tab-content">
+        <h3>References</h3>
+        <ul style="list-style: none; padding: 0; line-height: 1.8;">
+            <li style="margin-bottom: 20px;">
+                <strong><a href="https://github.com/tlemane/kmindex" style="color: #0066cc;">kmindex</a></strong> &mdash; used for index building<br>
+                <span style="color: #444;">Lemane, T., Medvedev, P., Chikhi, R., &amp; Peterlongo, P. (2024).
+                kmindex: a flexible and efficient k-mer indexing framework for large collections of sequencing data.
+                <em>Nature Computational Science</em>.
+                <a href="https://doi.org/10.1038/s43588-024-00596-6" style="color: #0066cc;">https://doi.org/10.1038/s43588-024-00596-6</a></span>
+            </li>
+            <li style="margin-bottom: 20px;">
+                <strong><a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere</a></strong> &mdash; used for false positive reduction<br>
+                <span style="color: #444;">Robidou, L., &amp; Peterlongo, P. (2021).
+                findere: fast and precise approximate membership query.
+                <em>SPIRE 2021 &mdash; String Processing and Information Retrieval</em>.
+                <a href="https://doi.org/10.1007/978-3-030-86692-1_13" style="color: #0066cc;">https://doi.org/10.1007/978-3-030-86692-1_13</a></span>
+            </li>
+            <li style="margin-bottom: 20px;">
+                <strong><a href="https://logan-search.org/" style="color: #0066cc;">Logan Search</a></strong> &mdash; source of the span calculation formula<br>
+                <span style="color: #444;">Chikhi, R., Raffestin, B., Korobeynikov, A., Edgar, R., &amp; Babaian, A. (2024).
+                Logan: Planetary-Scale Genome Assembly Surveys Life's Diversity.
+                <em>bioRxiv</em>.
+                <a href="https://doi.org/10.1101/2024.07.30.605881" style="color: #0066cc;">https://doi.org/10.1101/2024.07.30.605881</a></span>
+            </li>
+        </ul>
     </div>
 
     <script>
