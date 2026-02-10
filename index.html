@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index Size Calculator</title>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$']] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
     <style>
         body {
             font-family: system-ui, sans-serif;
@@ -11,6 +18,7 @@
             margin: 40px auto;
             padding: 20px;
         }
+
         h1 {
             margin-bottom: 20px;
         }
@@ -21,6 +29,7 @@
             border-bottom: 2px solid #ddd;
             margin-bottom: 20px;
         }
+
         .tab-btn {
             padding: 10px 20px;
             border: none;
@@ -33,16 +42,20 @@
             margin-bottom: -2px;
             transition: color 0.2s, border-color 0.2s;
         }
+
         .tab-btn:hover {
             color: #333;
         }
+
         .tab-btn.active {
             color: #0066cc;
             border-bottom-color: #0066cc;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
         }
@@ -53,24 +66,30 @@
             margin-top: 15px;
             font-weight: 500;
         }
-        input[type="number"], input[type="range"] {
+
+        input[type="number"],
+        input[type="range"] {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             box-sizing: border-box;
         }
+
         .slider-container {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .slider-container input[type="range"] {
             flex: 1;
         }
+
         .slider-value {
             min-width: 50px;
             text-align: right;
         }
+
         .output {
             margin-top: 25px;
             padding: 15px;
@@ -85,19 +104,24 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
-        .result-table th, .result-table td {
+
+        .result-table th,
+        .result-table td {
             border: 1px solid #ddd;
             padding: 8px 12px;
             text-align: right;
         }
+
         .result-table th {
             background: #f0f0f0;
             font-weight: 600;
             text-align: center;
         }
+
         .result-table tr:nth-child(even) {
             background: #fafafa;
         }
+
         .result-table tr:hover {
             background: #e8f0fe;
         }
@@ -106,15 +130,52 @@
         #tab-advanced {
             max-width: 500px;
         }
+
+        /* Formulas tab */
+        #tab-formulas {
+            max-width: 600px;
+        }
+
+        .formula-section {
+            margin-bottom: 30px;
+        }
+
+        .formula-section h3 {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .formula-box {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 12px 16px;
+            margin: 10px 0;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .formula-result {
+            margin-top: 15px;
+            padding: 12px 15px;
+            background: #e8f4e8;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
     </style>
 </head>
+
 <body>
     <h1>Index Size Calculator</h1>
-    <p style="color: #666; margin-top: -10px; margin-bottom: 20px;">A tool to help in dimensioning Bloom Filters for <a href="https://tlemane.github.io/kmindex/" style="color: #0066cc;">kmindex</a></p>
+    <p style="color: #666; margin-top: -10px; margin-bottom: 20px;">A tool to help in dimensioning Bloom Filters for <a
+            href="https://tlemane.github.io/kmindex/" style="color: #0066cc;">kmindex</a></p>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="tab-quick">Quick Estimate</button>
         <button class="tab-btn" data-tab="tab-advanced">Advanced</button>
+        <button class="tab-btn" data-tab="tab-formulas">Explainations</button>
     </div>
 
     <!-- Quick Estimate Tab -->
@@ -122,8 +183,9 @@
         <label for="q_n_samples">Number of Samples</label>
         <input type="number" id="q_n_samples" value="2000" min="1">
 
-        <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere)</a></label>
-        <input type="number" id="q_fpr" value="0.25" min="0.0001" max="1" step="0.0001">
+        <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
+                style="color: #0066cc;">findere)</a></label>
+        <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
 
         <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
         <div class="slider-container">
@@ -132,6 +194,60 @@
         </div>
 
         <div id="quick_output"></div>
+    </div>
+
+    <!-- Formulas Tab -->
+    <div id="tab-formulas" class="tab-content">
+        <div class="formula-section">
+            <h3>From K-mer Count to Bloom Filter Size</h3>
+            <p>Given a number of k-mer (<em>kmer_count</em>) and a false positive rate (<em>p</em>), we derive the
+                <strong><em>span</em></strong> and the <strong>Bloom filter size</strong> (<em>bf_size</em>) as follows:
+            </p>
+            <div class="formula-box">
+                $$\mathrm{span} = \lfloor \log_2(\mathrm{kmer\_count}) \rfloor$$
+                $$\mathrm{max\_kmer\_count} = 2^{\mathrm{span}+1} - 1$$
+                $$f = \frac{-\ln(p)}{\ln(2)^2}$$
+                $$\mathrm{bf\_size} = \left\lfloor \frac{f \times 2^{\mathrm{span}+1} + 7}{8} \right\rfloor \times 8
+                \quad \text{(bits)}$$
+            </div>
+
+            <p>The <strong>actual maximum</strong> number of k-mers that can be indexed into this span is given by
+                <em>max_kmer_count</em>.</p>
+
+            <label for="f_kmer_count">K-mer Count (<em>kmer_count</em>)</label>
+            <input type="number" id="f_kmer_count" value="4194304" min="1">
+
+            <label for="f_fpr">False Positive Rate (<em>p</em>)</label>
+            <input type="number" id="f_fpr" value="0.25" min="0.05" max="1" step="0.05">
+
+            <div id="formula_bf_output" class="formula-result"></div>
+        </div>
+
+        <div class="formula-section">
+            <h3>Index Size</h3>
+            <p>Given the Bloom filter size (<em>bf_size</em>), the number of samples (<em>n_samples</em>), and the number of partitions (<em>n_partitions</em>):</p>
+            <div class="formula-box">
+                $$\mathrm{row\_size} = \left\lfloor \frac{\mathrm{n\_samples} + 7}{8} \right\rfloor \quad
+                \text{(bytes)}$$
+                $$\mathrm{col\_size} = \left\lfloor \frac{\lfloor \mathrm{bf\_size} / \mathrm{n\_partitions} \rfloor +
+                63}{64} \right\rfloor \times 64 \times \mathrm{n\_partitions} \quad \text{(rows)}$$
+                $$\mathrm{index\_size} = \mathrm{row\_size} \times \mathrm{col\_size} + \mathrm{n\_partitions} \times 49
+                \quad \text{(bytes)}$$
+                $$\mathrm{partition\_file\_size} = \frac{\mathrm{index\_size}}{\mathrm{n\_partitions}} \quad
+                \text{(bytes)}$$
+            </div>
+
+            <label for="f_n_samples">Number of Samples (<em>n_samples</em>)</label>
+            <input type="number" id="f_n_samples" value="2000" min="1">
+
+            <label for="f_n_partitions">Number of Partitions (<em>n_partitions</em>)</label>
+            <div class="slider-container">
+                <input type="range" id="f_n_partitions" min="0" max="10" value="8">
+                <span class="slider-value" id="f_partition_display">256</span>
+            </div>
+
+            <div id="formula_index_output" class="formula-result"></div>
+        </div>
     </div>
 
     <!-- Advanced Tab -->
@@ -145,8 +261,9 @@
         <label for="max_kmer_count">Max K-mer Count</label>
         <input type="number" id="max_kmer_count" value="8388607" min="1">
 
-        <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere)</a></label>
-        <input type="number" id="fpr" value="0.25" min="0.0001" max="1" step="0.01">
+        <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
+                style="color: #0066cc;">findere)</a></label>
+        <input type="number" id="fpr" value="0.25" min="0.05" max="1" step="0.05">
 
         <label for="n_samples">Number of Samples</label>
         <input type="number" id="n_samples" value="2000" min="1">
@@ -261,6 +378,60 @@
         qPartitionsInput.addEventListener('input', calculateQuick);
         calculateQuick();
 
+        // --- Formulas Tab ---
+        const fKmerCountInput = document.getElementById('f_kmer_count');
+        const fFprInput = document.getElementById('f_fpr');
+        const fNSamplesInput = document.getElementById('f_n_samples');
+        const fPartitionsInput = document.getElementById('f_n_partitions');
+        const fPartitionDisplay = document.getElementById('f_partition_display');
+        const formulaBfOutput = document.getElementById('formula_bf_output');
+        const formulaIndexOutput = document.getElementById('formula_index_output');
+
+        function calculateFormulas() {
+            const kmerCount = parseInt(fKmerCountInput.value) || 1;
+            const f = parseFloat(fFprInput.value) || 0.25;
+            const nSamples = parseInt(fNSamplesInput.value) || 1;
+            const nPartitions = sliderToPartitions(parseInt(fPartitionsInput.value));
+            fPartitionDisplay.textContent = nPartitions;
+
+            const span = computeSpan(kmerCount);
+            const maxKmerCount = computeMaxKmerCount(span);
+            const p = computeP(f);
+            const bfSize = computeBfSize(f, span);
+
+            formulaBfOutput.innerHTML =
+                '$$\\mathrm{span} = \\lfloor \\log_2(' + kmerCount.toLocaleString() + ') \\rfloor = \\mathbf{' + span + '}$$' +
+                '$$\\mathrm{max\\_kmer\\_count} = 2^{' + (span + 1) + '} - 1 = \\mathbf{' + maxKmerCount.toLocaleString() + '}$$' +
+                '$$p = \\frac{-\\ln(' + f + ')}{\\ln(2)^2} = \\mathbf{' + p.toFixed(4) + '}$$' +
+                '$$\\begin{aligned} \\mathrm{bf\\_size} &= \\left\\lfloor \\frac{' + p.toFixed(4) + ' \\times 2^{' + (span + 1) + '} + 7}{8} \\right\\rfloor \\times 8 \\\\ &= \\mathbf{' + bfSize.toLocaleString() + '} \\text{ bits} \\quad (\\mathbf{' + formatBytes(bfSize / 8) + '}) \\end{aligned}$$';
+
+            // Index size with partitions
+            const rowSize = Math.floor((nSamples + 7) / 8);
+            const colSize = Math.floor(
+                Math.floor((bfSize / nPartitions + 63) / 64) * 64 * nPartitions
+            );
+            const indexSize = rowSize * colSize + nPartitions * 49;
+            const partitionFileSize = indexSize / nPartitions;
+
+            formulaIndexOutput.innerHTML =
+                '$$\\mathrm{row\\_size} = \\left\\lfloor \\frac{' + nSamples + ' + 7}{8} \\right\\rfloor = \\mathbf{' + rowSize + '} \\text{ bytes}$$' +
+                '$$\\begin{aligned} \\mathrm{col\\_size} &= \\left\\lfloor \\frac{\\lfloor ' + bfSize.toLocaleString() + ' / ' + nPartitions + ' \\rfloor + 63}{64} \\right\\rfloor \\times 64 \\times ' + nPartitions + ' \\\\ &= \\mathbf{' + colSize.toLocaleString() + '} \\text{ rows} \\end{aligned}$$' +
+                '$$\\begin{aligned} \\mathrm{index\\_size} &= ' + rowSize + ' \\times ' + colSize.toLocaleString() + ' + ' + nPartitions + ' \\times 49 \\\\ &= \\mathbf{' + indexSize.toLocaleString() + '} \\text{ bytes} \\quad (\\mathbf{' + formatBytes(indexSize) + '}) \\end{aligned}$$' +
+                '$$\\begin{aligned} \\mathrm{partition\\_file\\_size} &= \\frac{' + indexSize.toLocaleString() + '}{' + nPartitions + '} \\\\ &= \\mathbf{' + partitionFileSize.toLocaleString() + '} \\text{ bytes} \\quad (\\mathbf{' + formatBytes(partitionFileSize) + '}) \\end{aligned}$$';
+
+            // Re-typeset MathJax for dynamic content
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetClear([formulaBfOutput, formulaIndexOutput]);
+                MathJax.typesetPromise([formulaBfOutput, formulaIndexOutput]);
+            }
+        }
+
+        fKmerCountInput.addEventListener('input', calculateFormulas);
+        fFprInput.addEventListener('input', calculateFormulas);
+        fNSamplesInput.addEventListener('input', calculateFormulas);
+        fPartitionsInput.addEventListener('input', calculateFormulas);
+        calculateFormulas();
+
         // --- Advanced Tab (existing calculator) ---
         const bfSizeInput = document.getElementById('bf_size');
         const spanInput = document.getElementById('span');
@@ -360,4 +531,5 @@
         calculate();
     </script>
 </body>
+
 </html>
