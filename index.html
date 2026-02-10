@@ -239,6 +239,39 @@
             font-size: 14px;
             color: #333;
         }
+        .params-box {
+            background-color: #fdf2f0;
+            border-left: 4px solid #c0392b;
+            padding: 12px 14px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .params-box label {
+            margin-top: 8px;
+        }
+
+        .params-box label:first-child {
+            margin-top: 0;
+        }
+
+        .info-box {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 10px 14px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .info-box::before {
+            content: "ℹ️ ";
+        }
+
+        .info-box a {
+            color: #0066cc;
+        }
     </style>
 </head>
 
@@ -256,27 +289,29 @@
 
     <!-- Quick Estimate Tab -->
     <div id="tab-quick" class="tab-content active">
-        <label for="q_n_samples">Samples per span</label>
-        <input type="number" id="q_n_samples" value="2000" min="1">
+        <div class="params-box">
+            <label for="q_n_samples">Samples per span</label>
+            <input type="number" id="q_n_samples" value="2000" min="1">
 
-        <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
-                style="color: #0066cc;">findere</a>)</label>
-        <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
+            <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
+                    style="color: #0066cc;">findere</a>)</label>
+            <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
 
-        <label>Span Range</label>
-        <div class="dual-range">
-            <input type="range" id="q_span_min" min="15" max="50" value="20">
-            <input type="range" id="q_span_max" min="15" max="50" value="40">
-        </div>
-        <div class="dual-range-values">
-            <span>Min: <strong id="q_span_min_display">20</strong></span>
-            <span>Max: <strong id="q_span_max_display">40</strong></span>
-        </div>
+            <label>Span Range</label>
+            <div class="dual-range">
+                <input type="range" id="q_span_min" min="15" max="50" value="20">
+                <input type="range" id="q_span_max" min="15" max="50" value="40">
+            </div>
+            <div class="dual-range-values">
+                <span>Min: <strong id="q_span_min_display">20</strong></span>
+                <span>Max: <strong id="q_span_max_display">40</strong></span>
+            </div>
 
-        <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
-        <div class="slider-container">
-            <input type="range" id="q_n_partitions" min="0" max="10" value="8">
-            <span class="slider-value" id="q_partition_display">256</span>
+            <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
+            <div class="slider-container">
+                <input type="range" id="q_n_partitions" min="0" max="10" value="8">
+                <span class="slider-value" id="q_partition_display">256</span>
+            </div>
         </div>
 
         <div id="quick_output"></div>
@@ -300,13 +335,14 @@
             <p>The <strong>actual maximum</strong> number of k-mers that can be indexed into this span is given by
                 <em>max_kmer_count</em>.</p>
 
-            <label for="f_kmer_count">K-mer Count (<em>kmer_count</em>)</label>
-            <input type="number" id="f_kmer_count" value="4194304" min="1">
+            <div class="params-box">
+                <label for="f_kmer_count">K-mer Count (<em>kmer_count</em>)</label>
+                <input type="number" id="f_kmer_count" value="4194304" min="1">
 
-            <label for="f_fpr">False Positive Rate (<em>p</em>)</label>
-            <input type="number" id="f_fpr" value="0.25" min="0.05" max="1" step="0.05">
-            <p>See <a href="https://github.com/lrobidou/findere"
-                style="color: #0066cc;">findere</a> for a better understanding of how the false positive rate is reduced at query time.</p>
+                <label for="f_fpr">False Positive Rate (<em>p</em>)</label>
+                <input type="number" id="f_fpr" value="0.25" min="0.05" max="1" step="0.05">
+                <p class="info-box">See <a href="https://github.com/lrobidou/findere">findere</a> for a better understanding of how the false positive rate is reduced at query time.</p>
+            </div>
             <div id="formula_bf_output" class="formula-result"></div>
         </div>
 
@@ -324,13 +360,15 @@
                 \text{(bytes)}$$
             </div>
 
-            <label for="f_n_samples">Number of Samples (<em>n_samples</em>)</label>
-            <input type="number" id="f_n_samples" value="2000" min="1">
+            <div class="params-box">
+                <label for="f_n_samples">Number of Samples (<em>n_samples</em>)</label>
+                <input type="number" id="f_n_samples" value="2000" min="1">
 
-            <label for="f_n_partitions">Number of Partitions (<em>n_partitions</em>)</label>
-            <div class="slider-container">
-                <input type="range" id="f_n_partitions" min="0" max="10" value="8">
-                <span class="slider-value" id="f_partition_display">256</span>
+                <label for="f_n_partitions">Number of Partitions (<em>n_partitions</em>)</label>
+                <div class="slider-container">
+                    <input type="range" id="f_n_partitions" min="0" max="10" value="8">
+                    <span class="slider-value" id="f_partition_display">256</span>
+                </div>
             </div>
 
             <div id="formula_index_output" class="formula-result"></div>
@@ -339,26 +377,28 @@
 
     <!-- Advanced Tab -->
     <div id="tab-advanced" class="tab-content">
-        <label for="bf_size">Bloom Filter Size (bits)</label>
-        <input type="number" id="bf_size" value="24204408" min="1">
+        <div class="params-box">
+            <label for="bf_size">Bloom Filter Size (bits)</label>
+            <input type="number" id="bf_size" value="24204408" min="1">
 
-        <label for="span">Span</label>
-        <input type="number" id="span" value="22" min="0">
+            <label for="span">Span</label>
+            <input type="number" id="span" value="22" min="0">
 
-        <label for="max_kmer_count">Max K-mer Count</label>
-        <input type="number" id="max_kmer_count" value="8388607" min="1">
+            <label for="max_kmer_count">Max K-mer Count</label>
+            <input type="number" id="max_kmer_count" value="8388607" min="1">
 
-        <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
-                style="color: #0066cc;">findere</a>)</label>
-        <input type="number" id="fpr" value="0.25" min="0.05" max="1" step="0.05">
+            <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
+                    style="color: #0066cc;">findere</a>)</label>
+            <input type="number" id="fpr" value="0.25" min="0.05" max="1" step="0.05">
 
-        <label for="n_samples">Number of Samples</label>
-        <input type="number" id="n_samples" value="2000" min="1">
+            <label for="n_samples">Number of Samples</label>
+            <input type="number" id="n_samples" value="2000" min="1">
 
-        <label for="n_partitions">Number of Partitions</label>
-        <div class="slider-container">
-            <input type="range" id="n_partitions" min="0" max="10" value="8">
-            <span class="slider-value" id="partition_display">256</span>
+            <label for="n_partitions">Number of Partitions</label>
+            <div class="slider-container">
+                <input type="range" id="n_partitions" min="0" max="10" value="8">
+                <span class="slider-value" id="partition_display">256</span>
+            </div>
         </div>
 
         <div id="output" class="output"></div>
