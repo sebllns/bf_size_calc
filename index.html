@@ -7,10 +7,47 @@
     <style>
         body {
             font-family: system-ui, sans-serif;
-            max-width: 500px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 20px;
         }
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn:hover {
+            color: #333;
+        }
+        .tab-btn.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form elements */
         label {
             display: block;
             margin-top: 15px;
@@ -34,54 +71,106 @@
             min-width: 50px;
             text-align: right;
         }
-        #output {
+        .output {
             margin-top: 25px;
             padding: 15px;
             background: #f5f5f5;
             border-radius: 5px;
             line-height: 1.6;
         }
+
+        /* Quick estimate table */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: right;
+        }
+        .result-table th {
+            background: #f0f0f0;
+            font-weight: 600;
+            text-align: center;
+        }
+        .result-table tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .result-table tr:hover {
+            background: #e8f0fe;
+        }
+
+        /* Advanced tab max-width */
+        #tab-advanced {
+            max-width: 500px;
+        }
     </style>
 </head>
 <body>
     <h1>Index Size Calculator</h1>
 
-    <label for="bf_size">Bloom Filter Size (bits)</label>
-    <input type="number" id="bf_size" value="8388608" min="1">
-
-    <label for="span">Span</label>
-    <input type="number" id="span" value="22" min="0">
-
-    <label for="max_kmer_count">Max K-mer Count</label>
-    <input type="number" id="max_kmer_count" value="4194304" min="1">
-
-    <label for="fpr">False Positive Rate (f)</label>
-    <input type="number" id="fpr" value="0.25" min="0.0001" max="1" step="0.0001">
-
-    <label for="n_samples">Number of Samples</label>
-    <input type="number" id="n_samples" value="100" min="1">
-
-    <label for="n_partitions">Number of Partitions</label>
-    <div class="slider-container">
-        <input type="range" id="n_partitions" min="0" max="10" value="8">
-        <span class="slider-value" id="partition_display">256</span>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-quick">Quick Estimate</button>
+        <button class="tab-btn" data-tab="tab-advanced">Advanced</button>
     </div>
 
-    <div id="output"></div>
+    <!-- Quick Estimate Tab -->
+    <div id="tab-quick" class="tab-content active">
+        <label for="q_n_samples">Number of Samples</label>
+        <input type="number" id="q_n_samples" value="2000" min="1">
+
+        <label for="q_fpr">False Positive Rate</label>
+        <input type="number" id="q_fpr" value="0.25" min="0.0001" max="1" step="0.0001">
+
+        <label for="q_n_partitions">Number of Partitions</label>
+        <div class="slider-container">
+            <input type="range" id="q_n_partitions" min="0" max="10" value="8">
+            <span class="slider-value" id="q_partition_display">256</span>
+        </div>
+
+        <div id="quick_output"></div>
+    </div>
+
+    <!-- Advanced Tab -->
+    <div id="tab-advanced" class="tab-content">
+        <label for="bf_size">Bloom Filter Size (bits)</label>
+        <input type="number" id="bf_size" value="24204408" min="1">
+
+        <label for="span">Span</label>
+        <input type="number" id="span" value="22" min="0">
+
+        <label for="max_kmer_count">Max K-mer Count</label>
+        <input type="number" id="max_kmer_count" value="8388607" min="1">
+
+        <label for="fpr">False Positive Rate (f)</label>
+        <input type="number" id="fpr" value="0.25" min="0.0001" max="1" step="0.01">
+
+        <label for="n_samples">Number of Samples</label>
+        <input type="number" id="n_samples" value="2000" min="1">
+
+        <label for="n_partitions">Number of Partitions</label>
+        <div class="slider-container">
+            <input type="range" id="n_partitions" min="0" max="10" value="8">
+            <span class="slider-value" id="partition_display">256</span>
+        </div>
+
+        <div id="output" class="output"></div>
+    </div>
 
     <script>
-        const bfSizeInput = document.getElementById('bf_size');
-        const spanInput = document.getElementById('span');
-        const maxKmerCountInput = document.getElementById('max_kmer_count');
-        const fprInput = document.getElementById('fpr');
-        const nSamplesInput = document.getElementById('n_samples');
-        const nPartitionsInput = document.getElementById('n_partitions');
-        const partitionDisplay = document.getElementById('partition_display');
-        const output = document.getElementById('output');
+        // --- Tab switching ---
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
 
-        let updating = false;
-
-        // Slider values: 1, 2, 4, 8, ... 1024 (powers of 2)
+        // --- Shared helpers ---
         function sliderToPartitions(val) {
             return Math.pow(2, val);
         }
@@ -95,32 +184,93 @@
         }
 
         function computeP(f) {
-            return -Math.log(f) / (Math.log(2) ** 2)
+            return -Math.log(f) / (Math.log(2) ** 2);
         }
 
-        // bf_size = ((p * 2^(span+1) + 7) // 8) * 8
         function computeBfSize(f, span) {
             return Math.floor((computeP(f) * Math.pow(2, span + 1) + 7) / 8) * 8;
         }
 
-        // span = log2(kmer_count)
         function computeSpan(kmerCount) {
             return Math.floor(Math.log2(kmerCount));
         }
 
-        // kmer_count = 2^span
         function computeMaxKmerCount(span) {
             return Math.pow(2, span + 1) - 1;
         }
 
-        // Reverse: given bf_size and f, find span
-        // bf_size >= p * 2^(span+1), so span = floor(log2(bf_size / p)) - 1
         function computeSpanFromBfSize(bfSize, f) {
-            const b = ((bfSize + 7) / 8) * 8
-            const p = computeP(f)
+            const b = ((bfSize + 7) / 8) * 8;
+            const p = computeP(f);
             const span = Math.floor(Math.log2(b / p)) - 1;
             return Math.max(0, span);
         }
+
+        function computeIndexSize(bfSize, nSamples, nPartitions) {
+            const rowSize = Math.floor((nSamples + 7) / 8);
+            const nRows = bfSize;
+            const colSize = Math.floor(
+                Math.floor((nRows / nPartitions + 63) / 64) * 64 * nPartitions
+            );
+            return rowSize * colSize + nPartitions * 49;
+        }
+
+        // --- Quick Estimate Tab ---
+        const qSamplesInput = document.getElementById('q_n_samples');
+        const qFprInput = document.getElementById('q_fpr');
+        const qPartitionsInput = document.getElementById('q_n_partitions');
+        const qPartitionDisplay = document.getElementById('q_partition_display');
+        const quickOutput = document.getElementById('quick_output');
+
+        function calculateQuick() {
+            const nSamples = parseInt(qSamplesInput.value) || 1;
+            const f = parseFloat(qFprInput.value) || 0.25;
+            const nPartitions = sliderToPartitions(parseInt(qPartitionsInput.value));
+            qPartitionDisplay.textContent = nPartitions;
+
+            let html = '<table class="result-table"><thead><tr>' +
+                '<th>Span</th>' +
+                '<th>Max K-mer Count</th>' +
+                '<th>Bloom Filter Size</th>' +
+                '<th>Partition File Size</th>' +
+                '<th>Total Index Size</th>' +
+                '</tr></thead><tbody>';
+
+            for (let span = 20; span <= 40; span++) {
+                const maxKmerCount = computeMaxKmerCount(span);
+                const bfSize = computeBfSize(f, span);
+                const indexSize = computeIndexSize(bfSize, nSamples, nPartitions);
+                const partitionFileSize = indexSize / nPartitions;
+
+                html += '<tr>' +
+                    '<td>' + span + '</td>' +
+                    '<td>' + maxKmerCount.toLocaleString() + '</td>' +
+                    '<td>' + formatBytes(bfSize / 8) + '</td>' +
+                    '<td>' + formatBytes(partitionFileSize) + '</td>' +
+                    '<td>' + formatBytes(indexSize) + '</td>' +
+                    '</tr>';
+            }
+
+            html += '</tbody></table>';
+            quickOutput.innerHTML = html;
+        }
+
+        qSamplesInput.addEventListener('input', calculateQuick);
+        qFprInput.addEventListener('input', calculateQuick);
+        qPartitionsInput.addEventListener('input', calculateQuick);
+        calculateQuick();
+
+        // --- Advanced Tab (existing calculator) ---
+        const bfSizeInput = document.getElementById('bf_size');
+        const spanInput = document.getElementById('span');
+        const maxKmerCountInput = document.getElementById('max_kmer_count');
+        const fprInput = document.getElementById('fpr');
+        const nSamplesInput = document.getElementById('n_samples');
+        const nPartitionsInput = document.getElementById('n_partitions');
+        const partitionDisplay = document.getElementById('partition_display');
+        const output = document.getElementById('output');
+
+        let updating = false;
 
         function updateFromBfSize() {
             if (updating) return;
@@ -179,10 +329,7 @@
 
             partitionDisplay.textContent = nPartitions;
 
-            // Row size: ceil(n_samples / 8)
             const rowSize = Math.floor((nSamples + 7) / 8);
-
-            // Column size calculation
             const nRows = bfSize;
             const colSize = Math.floor(
                 Math.floor((nRows / nPartitions + 63) / 64) * 64 * nPartitions
