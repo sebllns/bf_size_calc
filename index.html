@@ -126,6 +126,12 @@
             background: #e8f0fe;
         }
 
+        .result-table tfoot td {
+            font-weight: 600;
+            background: #e8e8e8;
+            border-top: 2px solid #bbb;
+        }
+
         /* Advanced tab max-width */
         #tab-advanced {
             max-width: 500px;
@@ -164,6 +170,75 @@
             border-radius: 5px;
             line-height: 1.6;
         }
+
+        /* Dual range slider */
+        .dual-range {
+            position: relative;
+            height: 30px;
+            margin-top: 5px;
+        }
+        .dual-range input[type="range"] {
+            position: absolute;
+            width: 100%;
+            pointer-events: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            top: 0;
+        }
+        .dual-range input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all;
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+        .dual-range input[type="range"]::-moz-range-thumb {
+            pointer-events: all;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+        .dual-range input[type="range"]:first-child::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+        }
+        .dual-range input[type="range"]:first-child::-moz-range-track {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+        }
+        .dual-range input[type="range"]:last-child::-webkit-slider-runnable-track {
+            height: 4px;
+            background: transparent;
+            border-radius: 2px;
+        }
+        .dual-range input[type="range"]:last-child::-moz-range-track {
+            height: 4px;
+            background: transparent;
+            border-radius: 2px;
+        }
+        .dual-range-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #333;
+        }
     </style>
 </head>
 
@@ -180,12 +255,22 @@
 
     <!-- Quick Estimate Tab -->
     <div id="tab-quick" class="tab-content active">
-        <label for="q_n_samples">Number of Samples</label>
+        <label for="q_n_samples">Samples per span</label>
         <input type="number" id="q_n_samples" value="2000" min="1">
 
         <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
                 style="color: #0066cc;">findere)</a></label>
         <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
+
+        <label>Span Range</label>
+        <div class="dual-range">
+            <input type="range" id="q_span_min" min="15" max="50" value="20">
+            <input type="range" id="q_span_max" min="15" max="50" value="40">
+        </div>
+        <div class="dual-range-values">
+            <span>Min: <strong id="q_span_min_display">20</strong></span>
+            <span>Max: <strong id="q_span_max_display">40</strong></span>
+        </div>
 
         <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
         <div class="slider-container">
@@ -338,13 +423,41 @@
         const qFprInput = document.getElementById('q_fpr');
         const qPartitionsInput = document.getElementById('q_n_partitions');
         const qPartitionDisplay = document.getElementById('q_partition_display');
+        const qSpanMinInput = document.getElementById('q_span_min');
+        const qSpanMaxInput = document.getElementById('q_span_max');
+        const qSpanMinDisplay = document.getElementById('q_span_min_display');
+        const qSpanMaxDisplay = document.getElementById('q_span_max_display');
         const quickOutput = document.getElementById('quick_output');
+
+        function updateSpanRange() {
+            let minVal = parseInt(qSpanMinInput.value);
+            let maxVal = parseInt(qSpanMaxInput.value);
+            if (minVal > maxVal) {
+                // Swap if user drags past the other thumb
+                if (this === qSpanMinInput) {
+                    qSpanMinInput.value = maxVal;
+                    minVal = maxVal;
+                } else {
+                    qSpanMaxInput.value = minVal;
+                    maxVal = minVal;
+                }
+            }
+            qSpanMinDisplay.textContent = minVal;
+            qSpanMaxDisplay.textContent = maxVal;
+            calculateQuick();
+        }
+
+        qSpanMinInput.addEventListener('input', updateSpanRange);
+        qSpanMaxInput.addEventListener('input', updateSpanRange);
 
         function calculateQuick() {
             const nSamples = parseInt(qSamplesInput.value) || 1;
             const f = parseFloat(qFprInput.value) || 0.25;
             const nPartitions = sliderToPartitions(parseInt(qPartitionsInput.value));
             qPartitionDisplay.textContent = nPartitions;
+
+            const spanMin = parseInt(qSpanMinInput.value);
+            const spanMax = parseInt(qSpanMaxInput.value);
 
             let html = '<table class="result-table"><thead><tr>' +
                 '<th>Span</th>' +
@@ -354,11 +467,17 @@
                 '<th>Total Index Size</th>' +
                 '</tr></thead><tbody>';
 
-            for (let span = 20; span <= 40; span++) {
+            let totalIndexSize = 0;
+            let totalPartitionFileSize = 0;
+
+            for (let span = spanMin; span <= spanMax; span++) {
                 const maxKmerCount = computeMaxKmerCount(span);
                 const bfSize = computeBfSize(f, span);
                 const indexSize = computeIndexSize(bfSize, nSamples, nPartitions);
                 const partitionFileSize = indexSize / nPartitions;
+
+                totalIndexSize += indexSize;
+                totalPartitionFileSize += partitionFileSize;
 
                 html += '<tr>' +
                     '<td>' + span + '</td>' +
@@ -369,7 +488,11 @@
                     '</tr>';
             }
 
-            html += '</tbody></table>';
+            html += '</tbody><tfoot><tr>' +
+                '<td colspan="3">Total</td>' +
+                '<td>' + formatBytes(totalPartitionFileSize) + '</td>' +
+                '<td>' + formatBytes(totalIndexSize) + '</td>' +
+                '</tr></tfoot></table>';
             quickOutput.innerHTML = html;
         }
 
@@ -514,8 +637,8 @@
 
             output.innerHTML = `
                 Size of a row: <strong>${rowSize}</strong> bytes<br>
-                Size of a column: <strong>${colSize}</strong> bytes<br>
-                The index will be split in <strong>${nPartitions}</strong> files.<br>
+                Size of a column: <strong>${colSize}</strong> rows<br>
+                The index will be split into <strong>${nPartitions}</strong> files.<br>
                 Size of a single partition file: <strong>${partitionFileSize}</strong> bytes (<strong>${partitionFileSizeStr}</strong>)<br>
                 The index will require a total of <strong>${indexSize}</strong> bytes (<strong>${indexSizeStr}</strong>) on disk.
             `;
