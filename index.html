@@ -239,6 +239,40 @@
             font-size: 14px;
             color: #333;
         }
+        .citation {
+            background-color: #f9f9f9;
+            border-left: 4px solid #8b6914;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .citation .citation-title {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .citation .citation-title a {
+            color: #0066cc;
+        }
+
+        .citation .citation-authors {
+            color: #555;
+            font-size: 13px;
+        }
+
+        .citation .citation-details {
+            color: #444;
+            margin-top: 4px;
+        }
+
+        .citation .citation-details a {
+            color: #0066cc;
+            font-size: 13px;
+        }
+
         .params-box {
             background-color: #fdf2f0;
             border-left: 4px solid #c0392b;
@@ -407,29 +441,35 @@
     <!-- References Tab -->
     <div id="tab-references" class="tab-content">
         <h3>References</h3>
-        <ul style="list-style: none; padding: 0; line-height: 1.8;">
-            <li style="margin-bottom: 20px;">
-                <strong><a href="https://github.com/tlemane/kmindex" style="color: #0066cc;">kmindex</a></strong> &mdash; used for index building<br>
-                <span style="color: #444;">Lemane, T., Medvedev, P., Chikhi, R., &amp; Peterlongo, P. (2024).
+        <div class="citation">
+            <div class="citation-title"><strong><a href="https://github.com/tlemane/kmindex">kmindex</a></strong> &mdash; used for index building</div>
+            <div class="citation-authors">Lemane, T., Medvedev, P., Chikhi, R., &amp; Peterlongo, P. (2024).</div>
+            <div class="citation-details">
                 kmindex: a flexible and efficient k-mer indexing framework for large collections of sequencing data.
-                <em>Nature Computational Science</em>.
-                <a href="https://doi.org/10.1038/s43588-024-00596-6" style="color: #0066cc;">https://doi.org/10.1038/s43588-024-00596-6</a></span>
-            </li>
-            <li style="margin-bottom: 20px;">
-                <strong><a href="https://github.com/lrobidou/findere" style="color: #0066cc;">findere</a></strong> &mdash; used for false positive reduction<br>
-                <span style="color: #444;">Robidou, L., &amp; Peterlongo, P. (2021).
+                <em>Nature Computational Science</em>.<br>
+                <a href="https://doi.org/10.1038/s43588-024-00596-6">https://doi.org/10.1038/s43588-024-00596-6</a>
+            </div>
+        </div>
+
+        <div class="citation">
+            <div class="citation-title"><strong><a href="https://github.com/lrobidou/findere">findere</a></strong> &mdash; used for false positive reduction</div>
+            <div class="citation-authors">Robidou, L., &amp; Peterlongo, P. (2021).</div>
+            <div class="citation-details">
                 findere: fast and precise approximate membership query.
-                <em>SPIRE 2021 &mdash; String Processing and Information Retrieval</em>.
-                <a href="https://doi.org/10.1007/978-3-030-86692-1_13" style="color: #0066cc;">https://doi.org/10.1007/978-3-030-86692-1_13</a></span>
-            </li>
-            <li style="margin-bottom: 20px;">
-                <strong><a href="https://logan-search.org/" style="color: #0066cc;">Logan Search</a></strong> &mdash; source of the span calculation formula<br>
-                <span style="color: #444;">Chikhi, R., Raffestin, B., Korobeynikov, A., Edgar, R., &amp; Babaian, A. (2024).
+                <em>SPIRE 2021 &mdash; String Processing and Information Retrieval</em>.<br>
+                <a href="https://doi.org/10.1007/978-3-030-86692-1_13">https://doi.org/10.1007/978-3-030-86692-1_13</a>
+            </div>
+        </div>
+
+        <div class="citation">
+            <div class="citation-title"><strong><a href="https://logan-search.org/">Logan Search</a></strong> &mdash; source of the span calculation formula</div>
+            <div class="citation-authors">Rayan Chikhi, Téo Lemane, Raphaël Loll-Krippleber, Mercè Montoliu-Nerin, Brice Raffestin, Antonio Pedro Camargo, Carson J. Miller, Mateus Bernabe Fiamenghi, Daniel Paiva Agustinho, Sina Majidian, Greg Autric, Maxime Hugues, Junkyoung Lee, Roland Faure, Kristen D. Curry, Jorge A. Moura de Sousa, Eduardo P. C. Rocha, David Koslicki, Paul Medvedev, Purav Gupta, Jessica Shen, Alejandro Morales-Tapia, Kate Sihuta, Peter J. Roy, Grant W. Brown, Robert C. Edgar, Anton Korobeynikov, Martin Steinegger, Caleb A. Lareau, Pierre Peterlongo, Artem Babaian (2024).</div>
+            <div class="citation-details">
                 Logan: Planetary-Scale Genome Assembly Surveys Life's Diversity.
-                <em>bioRxiv</em>.
-                <a href="https://doi.org/10.1101/2024.07.30.605881" style="color: #0066cc;">https://doi.org/10.1101/2024.07.30.605881</a></span>
-            </li>
-        </ul>
+                <em>bioRxiv</em>.<br>
+                <a href="https://doi.org/10.1101/2024.07.30.605881">https://doi.org/10.1101/2024.07.30.605881</a>
+            </div>
+        </div>
     </div>
 
     <script>
