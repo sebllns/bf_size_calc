@@ -327,7 +327,7 @@
             <label for="q_n_samples">Samples per span</label>
             <input type="number" id="q_n_samples" value="2000" min="1">
 
-            <label for="q_fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
+            <label for="q_fpr">False Positive Rate (Reduced at query time using <a href="https://github.com/lrobidou/findere"
                     style="color: #0066cc;">findere</a>)</label>
             <input type="number" id="q_fpr" value="0.25" min="0.05" max="1" step="0.05">
 
@@ -375,7 +375,7 @@
 
                 <label for="f_fpr">False Positive Rate (<em>p</em>)</label>
                 <input type="number" id="f_fpr" value="0.25" min="0.05" max="1" step="0.05">
-                <p class="info-box">See <a href="https://github.com/lrobidou/findere">findere</a> for a better understanding of how the false positive rate is reduced at query time.</p>
+                <p class="info-box">The <a href="https://github.com/lrobidou/findere">findere</a> algorithm optimizes queries by using $(k+z)$-mers to reduce the false positive rate at query time. The actual false positive rate becomes $p^z$. This allows Bloom filters to be built with a higher false positive rate while still providing accurate results, which reduces disk footprint. Usually building your index with $\{k=25,\; p=0.25\}$ and querying with $z=6$ provides a good balance.</p>
             </div>
             <div id="formula_bf_output" class="formula-result"></div>
         </div>
@@ -421,8 +421,7 @@
             <label for="max_kmer_count">Max K-mer Count</label>
             <input type="number" id="max_kmer_count" value="8388607" min="1">
 
-            <label for="fpr">False Positive Rate (see <a href="https://github.com/lrobidou/findere"
-                    style="color: #0066cc;">findere</a>)</label>
+            <label for="fpr">False Positive Rate</label>
             <input type="number" id="fpr" value="0.25" min="0.05" max="1" step="0.05">
 
             <label for="n_samples">Number of Samples</label>
