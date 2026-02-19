@@ -634,7 +634,7 @@
             formulaBfOutput.innerHTML =
                 '$$\\mathrm{span} = \\lfloor \\log_2(' + kmerCount.toLocaleString() + ') \\rfloor = \\mathbf{' + span + '}$$' +
                 '$$\\mathrm{max\\_kmer\\_count} = 2^{' + (span + 1) + '} - 1 = \\mathbf{' + maxKmerCount.toLocaleString() + '}$$' +
-                '$$p = \\frac{-\\ln(' + f + ')}{\\ln(2)^2} = \\mathbf{' + p.toFixed(4) + '}$$' +
+                '$$f = \\frac{-\\ln(' + f + ')}{\\ln(2)^2} = \\mathbf{' + p.toFixed(4) + '}$$' +
                 '$$\\begin{aligned} \\mathrm{bf\\_size} &= \\left\\lfloor \\frac{' + p.toFixed(4) + ' \\times 2^{' + (span + 1) + '} + 7}{8} \\right\\rfloor \\times 8 \\\\ &= \\mathbf{' + bfSize.toLocaleString() + '} \\text{ bits} \\quad (\\mathbf{' + formatBytes(bfSize / 8) + '}) \\end{aligned}$$';
 
             // Index size with partitions
