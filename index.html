@@ -333,12 +333,12 @@
 
             <label>Span Range</label>
             <div class="dual-range">
-                <input type="range" id="q_span_min" min="15" max="50" value="20">
-                <input type="range" id="q_span_max" min="15" max="50" value="40">
+                <input type="range" id="q_span_min" min="13" max="38" value="20">
+                <input type="range" id="q_span_max" min="13" max="38" value="38">
             </div>
             <div class="dual-range-values">
                 <span>Min: <strong id="q_span_min_display">20</strong></span>
-                <span>Max: <strong id="q_span_max_display">40</strong></span>
+                <span>Max: <strong id="q_span_max_display">38</strong></span>
             </div>
 
             <label for="q_n_partitions">Number of Partitions (i.e. number of files the index will be split into)</label>
@@ -362,7 +362,7 @@
                 $$\mathrm{span} = \lfloor \log_2(\mathrm{kmer\_count}) \rfloor$$
                 $$\mathrm{max\_kmer\_count} = 2^{\mathrm{span}+1} - 1$$
                 $$f = \frac{-\ln(p)}{\ln(2)^2}$$
-                $$\mathrm{bf\_size} = \left\lfloor \frac{f \times 2^{\mathrm{span}+1} + 7}{8} \right\rfloor \times 8
+                $$\mathrm{bf\_size} = \left\lceil \frac{f \times 2^{\mathrm{span}+1}}{8} \right\rceil \times 8
                 \quad \text{(bits)}$$
             </div>
 
@@ -384,10 +384,9 @@
             <h3>Index Size</h3>
             <p>Given the Bloom filter size (<em>bf_size</em>), the number of samples (<em>n_samples</em>), and the number of partitions (<em>n_partitions</em>):</p>
             <div class="formula-box">
-                $$\mathrm{row\_size} = \left\lfloor \frac{\mathrm{n\_samples} + 7}{8} \right\rfloor \quad
+                $$\mathrm{row\_size} = \left\lceil \frac{\mathrm{n\_samples}}{8} \right\rceil \quad
                 \text{(bytes)}$$
-                $$\mathrm{col\_size} = \left\lfloor \frac{\lfloor \mathrm{bf\_size} / \mathrm{n\_partitions} \rfloor +
-                63}{64} \right\rfloor \times 64 \times \mathrm{n\_partitions} \quad \text{(rows)}$$
+                $$\mathrm{col\_size} = \left\lceil \frac{\lfloor \mathrm{bf\_size} / \mathrm{n\_partitions} \rfloor}{64} \right\rceil \times 64 \times \mathrm{n\_partitions} \quad \text{(rows)}$$
                 $$\mathrm{index\_size} = \mathrm{row\_size} \times \mathrm{col\_size} + \mathrm{n\_partitions} \times 49
                 \quad \text{(bytes)}$$
                 $$\mathrm{partition\_file\_size} = \frac{\mathrm{index\_size}}{\mathrm{n\_partitions}} \quad
@@ -591,7 +590,7 @@
                 html += '<tr>' +
                     '<td>' + span + '</td>' +
                     '<td>' + maxKmerCount.toLocaleString() + '</td>' +
-                    '<td>' + formatBytes(bfSize / 8) + '</td>' +
+                    '<td>' + bfSize.toLocaleString() + '</td>' +
                     '<td>' + formatBytes(partitionFileSize) + '</td>' +
                     '<td>' + formatBytes(indexSize) + '</td>' +
                     '</tr>';
@@ -635,7 +634,7 @@
                 '$$\\mathrm{span} = \\lfloor \\log_2(' + kmerCount.toLocaleString() + ') \\rfloor = \\mathbf{' + span + '}$$' +
                 '$$\\mathrm{max\\_kmer\\_count} = 2^{' + (span + 1) + '} - 1 = \\mathbf{' + maxKmerCount.toLocaleString() + '}$$' +
                 '$$f = \\frac{-\\ln(' + f + ')}{\\ln(2)^2} = \\mathbf{' + p.toFixed(4) + '}$$' +
-                '$$\\begin{aligned} \\mathrm{bf\\_size} &= \\left\\lfloor \\frac{' + p.toFixed(4) + ' \\times 2^{' + (span + 1) + '} + 7}{8} \\right\\rfloor \\times 8 \\\\ &= \\mathbf{' + bfSize.toLocaleString() + '} \\text{ bits} \\quad (\\mathbf{' + formatBytes(bfSize / 8) + '}) \\end{aligned}$$';
+                '$$\\begin{aligned} \\mathrm{bf\\_size} &= \\left\\lceil \\frac{' + p.toFixed(4) + ' \\times 2^{' + (span + 1) + '}}{8} \\right\\rceil \\times 8 \\\\ &= \\mathbf{' + bfSize.toLocaleString() + '} \\text{ bits} \\quad (\\mathbf{' + formatBytes(bfSize / 8) + '}) \\end{aligned}$$';
 
             // Index size with partitions
             const rowSize = Math.floor((nSamples + 7) / 8);
@@ -646,8 +645,8 @@
             const partitionFileSize = indexSize / nPartitions;
 
             formulaIndexOutput.innerHTML =
-                '$$\\mathrm{row\\_size} = \\left\\lfloor \\frac{' + nSamples + ' + 7}{8} \\right\\rfloor = \\mathbf{' + rowSize + '} \\text{ bytes}$$' +
-                '$$\\begin{aligned} \\mathrm{col\\_size} &= \\left\\lfloor \\frac{\\lfloor ' + bfSize.toLocaleString() + ' / ' + nPartitions + ' \\rfloor + 63}{64} \\right\\rfloor \\times 64 \\times ' + nPartitions + ' \\\\ &= \\mathbf{' + colSize.toLocaleString() + '} \\text{ rows} \\end{aligned}$$' +
+                '$$\\mathrm{row\\_size} = \\left\\lceil \\frac{' + nSamples + '}{8} \\right\\rceil = \\mathbf{' + rowSize + '} \\text{ bytes}$$' +
+                '$$\\begin{aligned} \\mathrm{col\\_size} &= \\left\\lceil \\frac{\\lfloor ' + bfSize.toLocaleString() + ' / ' + nPartitions + ' \\rfloor}{64} \\right\\rceil \\times 64 \\times ' + nPartitions + ' \\\\ &= \\mathbf{' + colSize.toLocaleString() + '} \\text{ rows} \\end{aligned}$$' +
                 '$$\\begin{aligned} \\mathrm{index\\_size} &= ' + rowSize + ' \\times ' + colSize.toLocaleString() + ' + ' + nPartitions + ' \\times 49 \\\\ &= \\mathbf{' + indexSize.toLocaleString() + '} \\text{ bytes} \\quad (\\mathbf{' + formatBytes(indexSize) + '}) \\end{aligned}$$' +
                 '$$\\begin{aligned} \\mathrm{partition\\_file\\_size} &= \\frac{' + indexSize.toLocaleString() + '}{' + nPartitions + '} \\\\ &= \\mathbf{' + partitionFileSize.toLocaleString() + '} \\text{ bytes} \\quad (\\mathbf{' + formatBytes(partitionFileSize) + '}) \\end{aligned}$$';
 
